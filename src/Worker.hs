@@ -53,10 +53,13 @@ workUntilStopped events clock generatorPid others = do
       workerPid <- getSelfPid
       sendTo others (Fired (External event ts workerPid))
       workUntilStopped ((StoredEvent event ts workerPid) : events) (Clock ts) generatorPid others
-      
-    handle (Fired (External event timestamp pid)) clock = undefined
 
-    -- TODO considered smell, should be resolved if typed channels introduced to the solution
+    -- Lamport's IR2
+    handle (Fired (External event ets pid)) (Clock n) = do
+      let ts = if(ets >= n) then ets + 1 else (n+1)
+      workUntilStopped ((StoredEvent event ts pid) : events) (Clock ts) generatorPid others
+
+    -- TODO considered code smell, should be resolved if typed channels introduced to the solution
     handle command _               = die $ "Received incorrect command " ++ (show command)
 
 {-|

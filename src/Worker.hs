@@ -3,6 +3,7 @@ module Worker(run) where
 import           Control.Distributed.Process
 import           Data.List                   (sort)
 import           Protocol
+import           System.Random
 import           Utils
 
 {-|
@@ -21,11 +22,11 @@ instance Ord StoredEvent where
 data Result = Result Int Int deriving Show
 data Clock = Clock Timestamp
 
-run :: Process ()
-run = do
+run :: Int -> Process ()
+run seed = do
   InitWorker masterPid others <- expect
   workerPid                   <- getSelfPid
-  generatorPid                <- spawnLocal (generator workerPid)
+  generatorPid                <- spawnLocal (generator workerPid (mkStdGen seed))
   events                      <- workUntilStopped [] (Clock 0) generatorPid others
   logInfo $ show $ result $ sort events
   send masterPid Done
@@ -75,5 +76,20 @@ workUntilStopped events clock generatorPid others = do
 {-|
 Generates internal events for given worker
 -}
-generator :: ProcessId -> Process ()
-generator workerPid = return ()
+generator :: RandomGen r => ProcessId -> r -> Process ()
+generator workerPid rand = do
+  m <- expectTimeout (10 * mili) :: Process (Maybe Protocol)
+  case m of
+    Just Stop -> return ()
+    Nothing   -> gen
+
+  where
+    mili = 10 ^ 3
+    sec  = 10 ^ 6
+
+    gen :: Process ()
+    gen = do
+      let (n, nextRand) = next rand
+      let event = Event n
+      send workerPid (Internal event)
+      generator workerPid nextRand

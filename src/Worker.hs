@@ -1,15 +1,24 @@
 module Worker(run) where
 
+import           Control.Distributed.Process
+import           Data.List                   (sort)
 import           Protocol
 import           Utils
-import           Control.Distributed.Process
 
 {-|
 Stored events with both logical timestamp and process id for total ordering
 -}
 data StoredEvent = StoredEvent Event Timestamp ProcessId
-data Result = Result Int Int deriving Show
 
+instance Eq StoredEvent where
+  (==) (StoredEvent _ t1 p1) (StoredEvent _ t2 p2) = t1 == t2 && p1 == p2
+
+instance Ord StoredEvent where
+  (<=) (StoredEvent _ ts1 pid1) (StoredEvent _ ts2 pid2) =
+    if (ts1 == ts2) then pid1 <= pid2 else ts1 <= ts2
+
+
+data Result = Result Int Int deriving Show
 data Clock = Clock Timestamp
 
 run :: Process ()
@@ -18,16 +27,13 @@ run = do
   workerPid                   <- getSelfPid
   generatorPid                <- spawnLocal (generator workerPid)
   events                      <- workUntilStopped [] (Clock 0) generatorPid others
-  logInfo $ show $ result $ sortEvents events
+  logInfo $ show $ result $ sort events
   send masterPid Done
 
   where
     result :: [StoredEvent] -> Result
     result events = undefined -- TODO
 
-    sortEvents :: [StoredEvent] -> [StoredEvent]
-    sortEvents events = undefined -- TODO
-    
 {-|
 Receives messages from external process and from internal generator then
 stores them with timestamp and process id. Handles logical clock ticks.

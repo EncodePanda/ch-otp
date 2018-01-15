@@ -39,7 +39,7 @@ runWorker = do
       where
         vals = map (\ (StoredEvent (Event n) _ _) -> n) events
         len  = length events
-        val  = sum $ zipWith (+) [1..len] vals
+        val  = sum $ zipWith (*) [1..len] vals
 
 {-|
 Receives messages from external process and from internal generator then

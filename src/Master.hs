@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE TemplateHaskell    #-}
-module Master(runMaster) where
+module Master where
 
 import           Control.Concurrent                                 (threadDelay)
 import           Control.Distributed.Process
@@ -15,16 +15,16 @@ import           Worker
 
 remotable ['runWorker]
 
-data MasterConfig = MasterConfig { sendFor :: Int, waitFor :: Int }
+data MasterConfig = MasterConfig Int Int
 
-runMaster :: Backend -> [NodeId] -> MasterConfig -> Process ()
-runMaster backend nodes config = do
+runMaster :: Backend -> MasterConfig -> [NodeId] -> Process ()
+runMaster backend (MasterConfig sendFor waitFor)  nodes = do
   masterPid  <- getSelfPid
   workerPids <- spawnFor nodes $(mkStaticClosure 'runWorker)
   forM (zip workerPids [1..(length workerPids)]) $ initWorker masterPid workerPids
-  sleep $ sendFor config
+  sleep $ sendFor
   sendTo workerPids Stop
-  sleep $ waitFor config
+  sleep $ waitFor
   sendTo workerPids Results
   waitForWorkers (length workerPids)
   terminateAllSlaves backend

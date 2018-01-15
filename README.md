@@ -26,7 +26,7 @@ You can run master node using script `run-master.sh` with following arguments:
 ./run-master.sh [--host HOST] [--port PORT] [--sendFor SEND_FOR] [--waitFor WAIT_FOR]
 ```
 
-Run this on a single node. 
+Run this on a single node. Please not that `waitFor` should be reasonably big so that during grace period a worker can properly handle all waiting messages in the queue.
 
 Once the master nodes terminates, worker nodes will also terminate printing the final result on the console.
 

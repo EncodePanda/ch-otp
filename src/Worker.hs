@@ -21,7 +21,7 @@ instance Ord StoredEvent where
     if (ts1 == ts2) then pid1 <= pid2 else ts1 <= ts2
 
 
-data Result = Result Int Int deriving Show
+data Result = Result Int Integer deriving Show
 data Clock = Clock Timestamp
 
 runWorker :: Process ()
@@ -37,9 +37,10 @@ runWorker = do
     result :: [StoredEvent] -> Result
     result events = Result len val
       where
-        vals = map (\ (StoredEvent (Event n) _ _) -> n) events
+        vals = map (\ (StoredEvent (Event n) _ _) -> toInteger n) events
+        is   = map toInteger [1..len]
         len  = length events
-        val  = sum $ zipWith (*) [1..len] vals
+        val  = sum $ zipWith (*) is vals
 
 {-|
 Receives messages from external process and from internal generator then
@@ -80,15 +81,12 @@ Generates internal events for given worker
 -}
 generator :: RandomGen r => ProcessId -> r -> Process ()
 generator workerPid rand = do
-  m <- expectTimeout (10 * mili) :: Process (Maybe Protocol)
+  m <- expectTimeout 1 :: Process (Maybe Protocol)
   case m of
     Just Stop -> return ()
     Nothing   -> gen
 
   where
-    mili = 10 ^ 3
-    sec  = 10 ^ 6
-
     gen :: Process ()
     gen = do
       let (n, nextRand) = next rand

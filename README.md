@@ -53,14 +53,14 @@ The general algorithm is described as follows:
 
 As described by Lamport 
 
-```
-However, the resulting algorithm requires the active participation of all the processes. A process must know all the commands issued by other processes, so that the failure of a single process will make it impossible for any other process to execute State Machine commands, thereby halting the system. 
-```
+
+> However, the resulting algorithm requires the active participation of all the processes. A process must know all the commands issued by other processes, so that the failure of a single process will make it impossible for any other process to execute State Machine commands, thereby halting the system. 
+
 
 Thus the algorithm should work in non-perfect network but will halt if one the process dies definitely. 
 
-Lamport point to his other paper [The Implementation of Reliable Distributed Multiprocess Systems"](https://lamport.azurewebsites.net/pubs/implementation.pdf) which is introduction to the consensus protocols which seemd out of scope of this test
+Lamport point to his other paper [The Implementation of Reliable Distributed Multiprocess Systems"](https://lamport.azurewebsites.net/pubs/implementation.pdf) which is an introduction to the consensus protocols (which seemd out of scope of this test)
 
-### 2. Haskell without types?!
+### 2. Process as (sort of) partial functions
 
-Implementation uses more "low-level" API of `distributed-process`, instead of `Typed Channels`. This even led during the implementation process to one error, that could be spotted on compilation time (rather then runtime) if `typed channels` were used.
+Implementation uses more "low-level" API of `distributed-process`, instead of `Typed Channels`. During the implementation process this even led to one error, that could be spotted during compilation time (rather then runtime) if `typed channels` were used.

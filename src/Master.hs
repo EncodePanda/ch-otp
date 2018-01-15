@@ -3,7 +3,7 @@
 {-# LANGUAGE TemplateHaskell    #-}
 module Master where
 
-import           Control.Concurrent                                 (threadDelay)
+
 import           Control.Distributed.Process
 import           Control.Distributed.Process.Backend.SimpleLocalnet
 import           Control.Distributed.Process.Closure
@@ -44,8 +44,3 @@ runMaster backend (MasterConfig sendFor waitFor)  nodes = do
 
     spawnFor :: [NodeId] -> Closure (Process ()) -> Process [ProcessId]
     spawnFor nodes c = forM nodes $ \nid -> spawn nid c
-
-    sleep :: Int -> Process ()
-    sleep n = liftIO $ threadDelay (n * second)
-
-    second = 10^6

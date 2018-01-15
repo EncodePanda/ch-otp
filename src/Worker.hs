@@ -93,6 +93,6 @@ generator workerPid rand = do
     gen = do
       let (n, nextRand) = next rand
       let event = Event n
-      send workerPid (Internal event)
+      send workerPid (Fired (Internal event))
       generator workerPid nextRand
 

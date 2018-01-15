@@ -16,10 +16,10 @@ data Event = Event Int
 data Msg = Internal Event | External Event Timestamp ProcessId
   deriving (Typeable, Generic, Show)
 
-data Protocol = InitWorker ProcessId [ProcessId] |
-                Stop                             |
-                Done                             |
-                Results                          |
+data Protocol = InitWorker ProcessId [ProcessId] Int |
+                Stop                                 |
+                Done                                 |
+                Results                              |
                 Fired Msg
   deriving (Typeable, Generic, Show)
 

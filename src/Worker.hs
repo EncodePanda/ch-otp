@@ -1,10 +1,11 @@
-module Worker(run) where
+module Worker(runWorker) where
 
 import           Control.Distributed.Process
 import           Data.List                   (sort)
 import           Protocol
 import           System.Random
 import           Utils
+import           Control.Distributed.Process.Closure
 
 {-|
 Stored events with both logical timestamp and process id for total ordering
@@ -22,12 +23,12 @@ instance Ord StoredEvent where
 data Result = Result Int Int deriving Show
 data Clock = Clock Timestamp
 
-run :: Int -> Process ()
-run seed = do
-  InitWorker masterPid others <- expect
-  workerPid                   <- getSelfPid
-  generatorPid                <- spawnLocal (generator workerPid (mkStdGen seed))
-  events                      <- workUntilStopped [] (Clock 0) generatorPid others
+runWorker :: Process ()
+runWorker = do
+  InitWorker masterPid others seed <- expect
+  workerPid                        <- getSelfPid
+  generatorPid                     <- spawnLocal (generator workerPid (mkStdGen seed))
+  events                           <- workUntilStopped [] (Clock 0) generatorPid others
   logInfo $ show $ result $ sort events
   send masterPid Done
 
@@ -93,3 +94,4 @@ generator workerPid rand = do
       let event = Event n
       send workerPid (Internal event)
       generator workerPid nextRand
+

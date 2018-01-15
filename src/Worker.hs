@@ -11,6 +11,7 @@ import           Control.Distributed.Process.Closure
 Stored events with both logical timestamp and process id for total ordering
 -}
 data StoredEvent = StoredEvent Event Timestamp ProcessId
+  deriving Show
 
 instance Eq StoredEvent where
   (==) (StoredEvent _ t1 p1) (StoredEvent _ t2 p2) = t1 == t2 && p1 == p2

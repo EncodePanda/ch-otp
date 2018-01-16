@@ -64,3 +64,8 @@ Lamport point to his other paper [The Implementation of Reliable Distributed Mul
 ### 2. Process as (sort of) partial functions
 
 Implementation uses more "low-level" API of `distributed-process`, instead of `Typed Channels`. During the implementation process this even led to one error, that could be spotted during compilation time (rather then runtime) if `typed channels` were used.
+
+### 3. Huge event lists failing
+
+List was chosen as an obvious data strucutre with O(1) append. However it seems when size of events list becomes roughly huge ( >1000000 on Mac Book Pro 2015 edition), the workers break with system errors - which seem to have something to do with memory issues.
+Solution might imply using other data structure or further investigation on error messages.
